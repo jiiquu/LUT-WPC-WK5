@@ -1,42 +1,44 @@
-// Hakee geoDatan
-const fetchData = async () => {
-    const response = await fetch('https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:kunta4500k&outputFormat=json&srsName=EPSG:4326');
-    const geoData = await response.json();
+const geoDataURL='https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:kunta4500k&outputFormat=json&srsName=EPSG:4326';
+const migrationURL = 'https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin/muutl/statfin_muutl_pxt_11a2.px';
 
-    const migrationDataResponse = await fetchMigrationData();
-    const parsedMigration = parseMigrationData(migrationDataResponse);
-    initMap(geoData, parsedMigration);
-    
+// Apufunktio JSON-fetchaukselle
+async function fetchJSON(url, init) {
+  const res = await fetch(url, init);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
 }
 
-
-const fetchMigrationData = async () => {
-    try {
-        const migrationURL = 'https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin/muutl/statfin_muutl_pxt_11a2.px';
-        const migrationBody = await (await fetch("./data/migration_query.json")).json();
-        const response = await fetch(migrationURL, {
+// Hakee kaiken datan kerralla
+async function fetchAllData() {
+    const migrationBodyPromise = fetchJSON("./data/migration_query.json");
+    const geoDataPromise = fetchJSON(geoDataURL);
+    const migrationDataPromise = migrationBodyPromise.then((body) => 
+        fetchJSON(migrationURL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(migrationBody)
-        });
+            body: JSON.stringify(body),
+        })
+    );
 
-        const result = await response.json();
-        
-        return result;
-    } catch (error) {
-        console.error("Failed to fetch migration data:", error);
-        return null;
-    }
-};
+    const [geoData, migrationRaw] = await Promise.all([geoDataPromise, migrationDataPromise]);
+    const migration = parseMigrationData(migrationRaw);
+    return { geoData, migration };
+}
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const { geoData, migration } = await fetchAllData();
+  initMap(geoData, migration);
+});
+
+// Kunnan koodin muunnos kolmikirjaimiseksi
 function toMunicipalityCode(kuntaVal) {
 
   return String(kuntaVal ?? "").slice(-3).padStart(3, "0");
 }
 
-// Colorize based on migration ratio
+// Värin määritys muuttoliikkeen perusteella
 function Colorize(mig) {
   if (!mig) return "#666666ff";
 
@@ -49,12 +51,12 @@ function Colorize(mig) {
 
   // (positive/negative)^3 * 60, max 120
   let hue = Math.pow(ratio, 3) * 60;
-  if (!Number.isFinite(hue)) hue = 120;   // Infinity -> max green
+  if (!Number.isFinite(hue)) hue = 120;
   hue = Math.min(120, hue);
 
   return `hsl(${hue}, 75%, 50%)`;
 }
-
+// Kartan tyylin asettaminen
 function styleByMigration(migrationData) {
   return function (feature) {
     const props = feature.properties ?? {};
@@ -70,17 +72,16 @@ function styleByMigration(migrationData) {
   };
 }
 
-// Initialize the map
-const initMap = (geoData, migrationData) => {
+// Alustaa kartan lisäämällä layerin ja pohjakartan ja kohdistamalla näkymän
+const initMap = (geoData, migration) => {
     
-//    const mig = migrationData[code];
     let map = L.map('map', {
         minZoom: -3
     })
     let geoJson = L.geoJSON(geoData, {
         weight: 2,
-        onEachFeature: (feature, layer) => getInfo(feature, layer, migrationData),
-        style: styleByMigration(migrationData)
+        onEachFeature: (feature, layer) => getInfo(feature, layer, migration),
+        style: styleByMigration(migration)
     }).addTo(map)
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -92,14 +93,14 @@ const initMap = (geoData, migrationData) => {
     
     
 }
-fetchData();
 
-const getInfo = (feature, layer, migrationData) => {
+// Lisää tooltipin ja popupin layeriin
+const getInfo = (feature, layer, migration) => {
     const nimi = feature.properties.nimi;
     layer.bindTooltip(nimi);
 
     const code = toMunicipalityCode(feature.properties.kunta);
-    const data = migrationData[code];
+    const data = migration[code];
 
   if (data) {
     layer.bindPopup(`
@@ -111,6 +112,7 @@ const getInfo = (feature, layer, migrationData) => {
   }
 
 }
+// Parsii muuttoliikedatan
 const parseMigrationData = (response) => {
     
     if (!response || !response.dimension || !response.value) {
@@ -125,7 +127,7 @@ const parseMigrationData = (response) => {
     const numTypes = migrationTypes.length;
 
     for (const [code, position] of Object.entries(municipalities)) {
-        const shortCode = code.slice(-3);
+        const shortCode = toMunicipalityCode(code);
         const start = position * numTypes;
         result[shortCode] = {};
 

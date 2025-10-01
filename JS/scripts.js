@@ -26,14 +26,14 @@ async function fetchAllData() {
         geoDataPromise, 
         migrationDataPromise.catch(() => null) // Jos epäonnistuu, jatketaan ilman
     ]);
-//    const migration = parseMigrationData(migrationRaw);
-    return { geoData/*, migration*/};
+    const migration = parseMigrationData(migrationRaw);
+    return { geoData, migration};
 }
 // Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        const { geoData/*, migration*/ } = await fetchAllData();
-        initMap(geoData/*, migration*/);
+        const { geoData, migration } = await fetchAllData();
+        initMap(geoData, migration);
     } catch (err) {
         console.error("Data loading failed:", err);
         const el = document.getElementById("map");
@@ -90,14 +90,14 @@ function toMunicipalityCode(kuntaVal) {
 } */
 
 // Alustaa kartan lisäämällä layerin ja pohjakartan ja kohdistamalla näkymän
-const initMap = (geoData/*, migration*/) => {
+const initMap = (geoData, migration) => {
     
     let map = L.map('map', {
         minZoom: -3
     })
     let geoJson = L.geoJSON(geoData, {
         weight: 2,
-        onEachFeature: (feature, layer) => getInfo(feature, layer/*, migration*/),
+        onEachFeature: (feature, layer) => getInfo(feature, layer, migration),
 //        style: styleByMigration(migration)
     }).addTo(map)
 
@@ -112,11 +112,11 @@ const initMap = (geoData/*, migration*/) => {
 }
 
 // Lisää tooltipin ja popupin layeriin
-const getInfo = (feature, layer/*, migration*/) => {
+const getInfo = (feature, layer, migration) => {
     const nimi = feature.properties.nimi;
     layer.bindTooltip(nimi);
 
-/*     const code = toMunicipalityCode(feature.properties.kunta);
+    const code = toMunicipalityCode(feature.properties.kunta);
     const data = migration[code];
 
   if (data) {
@@ -126,11 +126,11 @@ const getInfo = (feature, layer/*, migration*/) => {
       Out-migration: ${data.vm43_lahto}<br>
       Net migration: ${data.vm43_netto}
     `);
-  } */
+  }
 
 }
 // Parsii muuttoliikedatan
-/* const parseMigrationData = (response) => {
+const parseMigrationData = (response) => {
     
     if (!response || !response.dimension || !response.value) {
             console.error("Invalid migration data response:", response);
@@ -154,4 +154,4 @@ const getInfo = (feature, layer/*, migration*/) => {
     }
 
     return result;
-} */
+}

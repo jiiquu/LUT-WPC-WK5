@@ -1,0 +1,28 @@
+{
+  "query": [
+    {
+      "code": "Alue",
+      "selection": {
+        "filter": "all",
+        "values": ["*"]
+      }
+    },
+    {
+      "code": "Vuosi",
+      "selection": {
+        "filter": "item",
+        "values": ["2023"]
+      }
+    },
+    {
+      "code": "Tiedot",
+      "selection": {
+        "filter": "item",
+        "values": ["vm43_tulo", "vm43_lahto", "vm43_netto"]
+      }
+    }
+  ],
+  "response": {
+    "format": "json-stat2"
+  }
+}

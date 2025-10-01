@@ -94,7 +94,7 @@ const initMap = (geoData/*, migration*/) => {
     })
     let geoJson = L.geoJSON(geoData, {
         weight: 2,
-//        onEachFeature: (feature, layer) => getInfo(feature, layer/*, migration*/),
+        onEachFeature: (feature, layer) => getInfo(feature, layer/*, migration*/),
 //        style: styleByMigration(migration)
     }).addTo(map)
 
@@ -109,11 +109,11 @@ const initMap = (geoData/*, migration*/) => {
 }
 
 // Lisää tooltipin ja popupin layeriin
-/* const getInfo = (feature, layer, migration) => {
+const getInfo = (feature, layer/*, migration*/) => {
     const nimi = feature.properties.nimi;
     layer.bindTooltip(nimi);
 
-    const code = toMunicipalityCode(feature.properties.kunta);
+/*     const code = toMunicipalityCode(feature.properties.kunta);
     const data = migration[code];
 
   if (data) {
@@ -123,9 +123,9 @@ const initMap = (geoData/*, migration*/) => {
       Out-migration: ${data.vm43_lahto}<br>
       Net migration: ${data.vm43_netto}
     `);
-  }
+  } */
 
-} */
+}
 // Parsii muuttoliikedatan
 /* const parseMigrationData = (response) => {
     

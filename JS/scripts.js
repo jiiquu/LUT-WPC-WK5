@@ -10,27 +10,27 @@ async function fetchJSON(url, init) {
 
 // Hakee kaiken datan kerralla
 async function fetchAllData() {
-    const migrationBodyPromise = fetchJSON("./data/migration_query.json");
+//    const migrationBodyPromise = fetchJSON("./data/migration_query.json");
     const geoDataPromise = fetchJSON(geoDataURL);
-    const migrationDataPromise = migrationBodyPromise.then((body) => 
+/*     const migrationDataPromise = migrationBodyPromise.then((body) => 
         fetchJSON(migrationURL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(body),
-        })
-    );
+        }) 
+    );*/
 
-    const [geoData, migrationRaw] = await Promise.all([geoDataPromise, migrationDataPromise]);
-    const migration = parseMigrationData(migrationRaw);
-    return { geoData, migration };
+    const [geoData/*, migrationRaw*/] = await Promise.all([geoDataPromise/*, migrationDataPromise*/]);
+//    const migration = parseMigrationData(migrationRaw);
+    return { geoData/*, migration */};
 }
 // Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        const { geoData, migration } = await fetchAllData();
-        initMap(geoData, migration);
+        const { geoData/*, migration*/ } = await fetchAllData();
+        initMap(geoData/*, migration*/);
     } catch (err) {
         console.error("Data loading failed:", err);
         const el = document.getElementById("map");
@@ -41,10 +41,10 @@ document.addEventListener("DOMContentLoaded", async () => {
  });
 
  // Lisää globaalin virheenkäsittelijän
- window.addEventListener("unhandledrejection", (e) => {
+/*  window.addEventListener("unhandledrejection", (e) => {
   e.preventDefault();
   console.error("Unhandled promise rejection:", e.reason);
-});
+}); */
 
 // Kunnan koodin muunnos kolmikirjaimiseksi
 function toMunicipalityCode(kuntaVal) {
@@ -53,7 +53,7 @@ function toMunicipalityCode(kuntaVal) {
 }
 
 // Värin määritys muuttoliikkeen perusteella
-function Colorize(mig) {
+/* function Colorize(mig) {
   if (!mig) return "#666666ff";
 
   const positive = Math.max(0, mig.vm43_tulo ?? 0);
@@ -69,9 +69,9 @@ function Colorize(mig) {
   hue = Math.min(120, hue);
 
   return `hsl(${hue}, 75%, 50%)`;
-}
+} */
 // Kartan tyylin asettaminen
-function styleByMigration(migrationData) {
+/* function styleByMigration(migrationData) {
   return function (feature) {
     const props = feature.properties ?? {};
     const code = toMunicipalityCode(props.kunta);
@@ -84,32 +84,32 @@ function styleByMigration(migrationData) {
       fillColor: Colorize(mig)
     };
   };
-}
+} */
 
 // Alustaa kartan lisäämällä layerin ja pohjakartan ja kohdistamalla näkymän
-const initMap = (geoData, migration) => {
+const initMap = (geoData/*, migration*/) => {
     
     let map = L.map('map', {
         minZoom: -3
     })
     let geoJson = L.geoJSON(geoData, {
         weight: 2,
-        onEachFeature: (feature, layer) => getInfo(feature, layer, migration),
-        style: styleByMigration(migration)
+//        onEachFeature: (feature, layer) => getInfo(feature, layer/*, migration*/),
+//        style: styleByMigration(migration)
     }).addTo(map)
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+/*     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: "© OpenStreetMap"
     }).addTo(map);
-    map.fitBounds(geoJson.getBounds())
+ */    map.fitBounds(geoJson.getBounds())
     
     
     
 }
 
 // Lisää tooltipin ja popupin layeriin
-const getInfo = (feature, layer, migration) => {
+/* const getInfo = (feature, layer, migration) => {
     const nimi = feature.properties.nimi;
     layer.bindTooltip(nimi);
 
@@ -125,9 +125,9 @@ const getInfo = (feature, layer, migration) => {
     `);
   }
 
-}
+} */
 // Parsii muuttoliikedatan
-const parseMigrationData = (response) => {
+/* const parseMigrationData = (response) => {
     
     if (!response || !response.dimension || !response.value) {
             console.error("Invalid migration data response:", response);
@@ -151,4 +151,4 @@ const parseMigrationData = (response) => {
     }
 
     return result;
-}
+} */

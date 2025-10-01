@@ -98,11 +98,11 @@ const initMap = (geoData/*, migration*/) => {
 //        style: styleByMigration(migration)
     }).addTo(map)
 
-/*     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: "© OpenStreetMap"
     }).addTo(map);
- */    map.fitBounds(geoJson.getBounds())
+    map.fitBounds(geoJson.getBounds())
     
     
     

@@ -28,9 +28,20 @@ async function fetchAllData() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const { geoData, migration } = await fetchAllData();
-  initMap(geoData, migration);
-});
+//  const { geoData, migration } = await fetchAllData();
+//  initMap(geoData, migration);
+    try {
+        const { geoData, migration } = await fetchAllData();
+        initMap(geoData, migration);
+    } catch (err) {
+        console.error("Data loading failed:", err);
+        const el = document.getElementById("map");
+    if (el) {
+        el.innerHTML = '<div style="padding:12px;border:1px solid #ccc;border-radius:8px;">Failed to load data. Please try again later.</div>';
+    }
+    }
+ });
+
 
 // Kunnan koodin muunnos kolmikirjaimiseksi
 function toMunicipalityCode(kuntaVal) {

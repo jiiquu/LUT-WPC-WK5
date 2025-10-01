@@ -26,10 +26,8 @@ async function fetchAllData() {
     const migration = parseMigrationData(migrationRaw);
     return { geoData, migration };
 }
-
+// Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {
-//  const { geoData, migration } = await fetchAllData();
-//  initMap(geoData, migration);
     try {
         const { geoData, migration } = await fetchAllData();
         initMap(geoData, migration);

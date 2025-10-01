@@ -10,9 +10,9 @@ async function fetchJSON(url, init) {
 
 // Hakee kaiken datan kerralla
 async function fetchAllData() {
-//    const migrationBodyPromise = fetchJSON("./data/migration_query.json");
+    const migrationBodyPromise = fetchJSON("./data/migration_query.json");
     const geoDataPromise = fetchJSON(geoDataURL);
-/*     const migrationDataPromise = migrationBodyPromise.then((body) => 
+    const migrationDataPromise = migrationBodyPromise.then((body) => 
         fetchJSON(migrationURL, {
             method: "POST",
             headers: {
@@ -20,11 +20,11 @@ async function fetchAllData() {
             },
             body: JSON.stringify(body),
         }) 
-    );*/
+    );
 
-    const [geoData/*, migrationRaw*/] = await Promise.all([geoDataPromise/*, migrationDataPromise*/]);
+    const [geoData, migrationRaw] = await Promise.all([geoDataPromise, migrationDataPromise]);
 //    const migration = parseMigrationData(migrationRaw);
-    return { geoData/*, migration */};
+    return { geoData/*, migration*/};
 }
 // Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {

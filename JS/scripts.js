@@ -22,7 +22,10 @@ async function fetchAllData() {
         }) 
     );
 
-    const [geoData, migrationRaw] = await Promise.all([geoDataPromise, migrationDataPromise]);
+    const [geoData, migrationRaw] = await Promise.all([
+        geoDataPromise, 
+        migrationDataPromise.catch(() => null) // Jos epäonnistuu, jatketaan ilman
+    ]);
 //    const migration = parseMigrationData(migrationRaw);
     return { geoData/*, migration*/};
 }

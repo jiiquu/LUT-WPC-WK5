@@ -40,6 +40,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
  });
 
+ // Lisää globaalin virheenkäsittelijän
+ window.addEventListener("unhandledrejection", (e) => {
+  e.preventDefault();
+  console.error("Unhandled promise rejection:", e.reason);
+});
 
 // Kunnan koodin muunnos kolmikirjaimiseksi
 function toMunicipalityCode(kuntaVal) {

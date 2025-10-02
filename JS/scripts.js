@@ -1,6 +1,6 @@
 const geoDataURL='https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:kunta4500k&outputFormat=json&srsName=EPSG:4326';
 const migrationURL = 'https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin/muutl/statfin_muutl_pxt_11a2.px';
-
+const migrationBodyURL = './data/migration_query.json';
 // Apufunktio JSON-fetchaukselle
 async function fetchJSON(url, init) {
   const res = await fetch(url, init);
@@ -8,24 +8,30 @@ async function fetchJSON(url, init) {
   return res.json();
 }
 
+// Hakee geodatan
+async function fetchGeoData() {
+    return fetchJSON(geoDataURL);
+}
+
+// Hakee muuttoliikedatan
+async function fetchMigrationData() {
+    const body = await fetchJSON(migrationBodyURL);
+    return fetchJSON(migrationURL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body),
+    });
+}
+
 // Hakee kaiken datan kerralla
 async function fetchAllData() {
-    const migrationBodyPromise = fetchJSON("./data/migration_query.json");
-    const geoDataPromise = fetchJSON(geoDataURL);
-    const migrationDataPromise = migrationBodyPromise.then((body) => 
-        fetchJSON(migrationURL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body),
-        }) 
-    );
+    
+    const geoDataPromise = fetchGeoData();;
+    const migrationDataPromise = fetchMigrationData().catch(() => null); // Jos epäonnistuu, jatketaan ilman
 
-    const [geoData, migrationRaw] = await Promise.all([
-        geoDataPromise, 
-        migrationDataPromise.catch(() => null) // Jos epäonnistuu, jatketaan ilman
-    ]);
+    const [geoData, migrationRaw] = await Promise.all([geoDataPromise, migrationDataPromise]);
     const migration = parseMigrationData(migrationRaw);
     return { geoData, migration};
 }

@@ -119,14 +119,14 @@ const getInfo = (feature, layer, migration) => {
     const code = toMunicipalityCode(feature.properties.kunta);
     const data = migration[code];
 
-  if (data) {
-    layer.bindPopup(`
-      <strong>${nimi}</strong><br>
-      In-migration: ${data.vm43_tulo}<br>
-      Out-migration: ${data.vm43_lahto}<br>
-      Net migration: ${data.vm43_netto}
-    `);
-  }
+  
+layer.bindPopup(`
+    <strong>${nimi}</strong><br>
+    In-migration: ${data.vm43_tulo}<br>
+    Out-migration: ${data.vm43_lahto}<br>
+    Net migration: ${data.vm43_netto}
+`);
+
 
 }
 // Parsii muuttoliikedatan

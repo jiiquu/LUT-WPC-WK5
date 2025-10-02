@@ -132,10 +132,10 @@ const getInfo = (feature, layer, migration) => {
 // Parsii muuttoliikedatan
 const parseMigrationData = (response) => {
     
-/*     if (!response || !response.dimension || !response.value) {
+    if (!response || !response.dimension || !response.value) {
             console.error("Invalid migration data response:", response);
             return {};
-        } */
+        }
 
     const { dimension, value } = response;
     const municipalities = dimension.Alue.category.index;

@@ -35,9 +35,10 @@ async function fetchAllData() {
     const migration = parseMigrationData(migrationRaw);
     return { geoData, migration};
 }
+
 // Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {
-    try {
+   /*  try {
         const { geoData, migration } = await fetchAllData();
         initMap(geoData, migration);
     } catch (err) {
@@ -46,7 +47,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (el) {
         el.innerHTML = '<div style="padding:12px;border:1px solid #ccc;border-radius:8px;">Failed to load data. Please try again later.</div>';
     }
-    }
+    } */
+    const geoData = await fetchGeoData();
+    const migration = await fetchMigrationData().then(parseMigrationData).catch(() => ({}));
+    initMap(geoData, migration);
  });
 
  // Lisää globaalin virheenkäsittelijän
@@ -96,7 +100,7 @@ function toMunicipalityCode(kuntaVal) {
 } */
 
 // Alustaa kartan lisäämällä layerin ja pohjakartan ja kohdistamalla näkymän
-const initMap = (geoData, migration) => {
+const initMap = async (geoData, migration) => {
     
     let map = L.map('map', {
         minZoom: -3
@@ -121,6 +125,7 @@ const initMap = (geoData, migration) => {
 const getInfo = (feature, layer, migration) => {
     const nimi = feature.properties.nimi;
     layer.bindTooltip(nimi);
+    
 
     const code = toMunicipalityCode(feature.properties.kunta);
     const data = migration[code];

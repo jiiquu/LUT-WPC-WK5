@@ -26,7 +26,7 @@ async function fetchMigrationData() {
 }
 
 // Hakee kaiken datan kerralla
-async function fetchAllData() {
+/* async function fetchAllData() {
     
     const geoDataPromise = fetchGeoData();;
     const migrationDataPromise = fetchMigrationData().catch(() => null); // Jos epäonnistuu, jatketaan ilman
@@ -34,22 +34,12 @@ async function fetchAllData() {
     const [geoData, migrationRaw] = await Promise.all([geoDataPromise, migrationDataPromise]);
     const migration = parseMigrationData(migrationRaw);
     return { geoData, migration};
-}
+} */
 
 // Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {
-   /*  try {
-        const { geoData, migration } = await fetchAllData();
-        initMap(geoData, migration);
-    } catch (err) {
-        console.error("Data loading failed:", err);
-        const el = document.getElementById("map");
-    if (el) {
-        el.innerHTML = '<div style="padding:12px;border:1px solid #ccc;border-radius:8px;">Failed to load data. Please try again later.</div>';
-    }
-    } */
     const geoData = await fetchGeoData();
-    const migration = await fetchMigrationData().then(parseMigrationData).catch(() => ({}));
+    const migration = await fetchMigrationData()/*.then(parseMigrationData).catch(() => ({}));*/
     initMap(geoData, migration);
  });
 

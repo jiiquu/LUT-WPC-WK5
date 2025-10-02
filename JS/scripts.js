@@ -39,7 +39,7 @@ async function fetchMigrationData() {
 // Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {
     const geoData = await fetchGeoData();
-    const migration = await fetchMigrationData()/*.then(parseMigrationData).catch(() => ({}));*/
+    const migration = await fetchMigrationData().then(parseMigrationData).catch(() => ({}));
     initMap(geoData, migration);
  });
 
@@ -56,7 +56,7 @@ function toMunicipalityCode(kuntaVal) {
 }
 
 // Värin määritys muuttoliikkeen perusteella
-/* function Colorize(mig) {
+function Colorize(mig) {
   if (!mig) return "#666666ff";
 
   const positive = Math.max(0, mig.vm43_tulo ?? 0);
@@ -72,9 +72,9 @@ function toMunicipalityCode(kuntaVal) {
   hue = Math.min(120, hue);
 
   return `hsl(${hue}, 75%, 50%)`;
-} */
+}
 // Kartan tyylin asettaminen
-/* function styleByMigration(migrationData) {
+function styleByMigration(migrationData) {
   return function (feature) {
     const props = feature.properties ?? {};
     const code = toMunicipalityCode(props.kunta);
@@ -87,7 +87,7 @@ function toMunicipalityCode(kuntaVal) {
       fillColor: Colorize(mig)
     };
   };
-} */
+}
 
 // Alustaa kartan lisäämällä layerin ja pohjakartan ja kohdistamalla näkymän
 const initMap = async (geoData, migration) => {
@@ -98,7 +98,7 @@ const initMap = async (geoData, migration) => {
     let geoJson = L.geoJSON(geoData, {
         weight: 2,
         onEachFeature: (feature, layer) => getInfo(feature, layer, migration),
-//        style: styleByMigration(migration)
+        style: styleByMigration(migration)
     }).addTo(map)
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

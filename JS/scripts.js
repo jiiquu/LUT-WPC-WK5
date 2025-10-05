@@ -27,39 +27,37 @@ async function fetchMigrationData() {
         body: JSON.stringify(body),
     });
 }
-
-// Hakee kaiken datan kerralla
-/* async function fetchAllData() {
+// Parsii muuttoliikedatan
+const parseMigrationData = (response) => {
     
-    const geoDataPromise = fetchGeoData();;
-    const migrationDataPromise = fetchMigrationData().catch(() => null); // Jos epäonnistuu, jatketaan ilman
+    if (!response || !response.dimension || !response.value) {
+            console.error("Invalid migration data response:", response);
+            return {};
+        }
 
-    const [geoData, migrationRaw] = await Promise.all([geoDataPromise, migrationDataPromise]);
-    const migration = parseMigrationData(migrationRaw);
-    return { geoData, migration};
-} */
+    const { dimension, value } = response;
+    const municipalities = dimension.Alue.category.index;
+    const migrationTypes = Object.keys(dimension.Tiedot.category.index);
+    const result = {};
+    const numTypes = migrationTypes.length;
 
-// Käynnistää prosessit, kun DOM on valmis
-document.addEventListener("DOMContentLoaded", async () => {
-  geoData = await fetchGeoData();
-  migration = await fetchMigrationData()
-    .then(parseMigrationData)
-    .catch(() => ({}));
-  initMap(geoData, migration);
-});
+    for (const [code, position] of Object.entries(municipalities)) {
+        const shortCode = toMunicipalityCode(code);
+        const start = position * numTypes;
+        result[shortCode] = {};
 
- // Lisää globaalin virheenkäsittelijän
-/*  window.addEventListener("unhandledrejection", (e) => {
-  e.preventDefault();
-  console.error("Unhandled promise rejection:", e.reason);
-}); */
+        migrationTypes.forEach((type, i) => {
+            result[shortCode][type] = value[start + i];
+        });
+    }
 
+    return result;
+}
 // Kunnan koodin muunnos kolmikirjaimiseksi
 function toMunicipalityCode(kuntaVal) {
 
   return String(kuntaVal ?? "").slice(-3).padStart(3, "0");
 }
-
 // Värin määritys muuttoliikkeen perusteella
 function Colorize(mig) {
   if (!mig) return "#666666ff";
@@ -93,6 +91,19 @@ function styleByMigration(migrationData) {
     };
   };
 }
+
+// Käynnistää prosessit, kun DOM on valmis
+document.addEventListener("DOMContentLoaded", async () => {
+  geoData = await fetchGeoData();
+  migration = await fetchMigrationData()
+    .then(parseMigrationData)
+    .catch(() => ({}));
+  initMap(geoData, migration);
+});
+
+
+
+
 
 // Alustaa kartan lisäämällä layerin ja pohjakartan ja kohdistamalla näkymän
 const initMap = async (geoData, migration) => {
@@ -135,29 +146,4 @@ const getInfo = (feature, layer, migration) => {
   }
 
 }
-// Parsii muuttoliikedatan
-const parseMigrationData = (response) => {
-    
-    if (!response || !response.dimension || !response.value) {
-            console.error("Invalid migration data response:", response);
-            return {};
-        }
 
-    const { dimension, value } = response;
-    const municipalities = dimension.Alue.category.index;
-    const migrationTypes = Object.keys(dimension.Tiedot.category.index);
-    const result = {};
-    const numTypes = migrationTypes.length;
-
-    for (const [code, position] of Object.entries(municipalities)) {
-        const shortCode = toMunicipalityCode(code);
-        const start = position * numTypes;
-        result[shortCode] = {};
-
-        migrationTypes.forEach((type, i) => {
-            result[shortCode][type] = value[start + i];
-        });
-    }
-
-    return result;
-}

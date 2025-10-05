@@ -41,12 +41,12 @@ async function fetchMigrationData() {
 
 // Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {
-    [geoData, migration] = await Promise.all([
-      fetchGeoData(),
-      fetchMigrationData().then(parseMigrationData).catch(() => ({}))
-    ]);
-    initMap(geoData, migration);
- });
+  geoData = await fetchGeoData();
+  migration = await fetchMigrationData()
+    .then(parseMigrationData)
+    .catch(() => ({}));
+  initMap(geoData, migration);
+});
 
  // Lisää globaalin virheenkäsittelijän
 /*  window.addEventListener("unhandledrejection", (e) => {

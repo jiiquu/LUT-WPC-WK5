@@ -2,7 +2,9 @@ const geoDataURL='https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&re
 const migrationURL = 'https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin/muutl/statfin_muutl_pxt_11a2.px';
 const migrationBodyURL = './data/migration_query.json';
 let geoData = {};
+let migrationRaw = {};
 let migration = {};
+
 
 // Apufunktio JSON-fetchaukselle
 async function fetchJSON(url, init) {
@@ -12,20 +14,24 @@ async function fetchJSON(url, init) {
 }
 
 // Hakee geodatan
-function fetchGeoData() {
-    return fetchJSON(geoDataURL);
+async function fetchGeoData() {
+    geoData = await fetchJSON(geoDataURL);
+    console.log(geoData);
+    fetchMigrationData();
 }
 
 // Hakee muuttoliikedatan
 async function fetchMigrationData() {
     const body = await fetchJSON(migrationBodyURL);
-    return fetchJSON(migrationURL, {
+    migrationRaw = await fetchJSON(migrationURL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(body),
     });
+    console.log(migrationRaw);
+    parseMigrationData(migrationRaw);
 }
 // Parsii muuttoliikedatan
 const parseMigrationData = (response) => {
@@ -51,7 +57,9 @@ const parseMigrationData = (response) => {
         });
     }
 
-    return result;
+    migration = result;
+    console.log(migration);
+    initMap(geoData, migration);
 }
 // Kunnan koodin muunnos kolmikirjaimiseksi
 function toMunicipalityCode(kuntaVal) {
@@ -93,14 +101,13 @@ function styleByMigration(migrationData) {
 }
 
 // Käynnistää prosessit, kun DOM on valmis
-document.addEventListener("DOMContentLoaded", async () => {
+/* document.addEventListener("DOMContentLoaded", async () => {
   geoData = await fetchGeoData();
   migration = await fetchMigrationData()
     .then(parseMigrationData)
     .catch(() => ({}));
   initMap(geoData, migration);
-});
-
+}); */
 
 
 
@@ -147,3 +154,4 @@ const getInfo = (feature, layer, migration) => {
 
 }
 
+fetchGeoData();

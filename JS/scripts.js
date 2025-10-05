@@ -1,6 +1,9 @@
 const geoDataURL='https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:kunta4500k&outputFormat=json&srsName=EPSG:4326';
 const migrationURL = 'https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin/muutl/statfin_muutl_pxt_11a2.px';
 const migrationBodyURL = './data/migration_query.json';
+let geoData = {};
+let migrationData = {};
+
 // Apufunktio JSON-fetchaukselle
 async function fetchJSON(url, init) {
   const res = await fetch(url, init);
@@ -9,7 +12,7 @@ async function fetchJSON(url, init) {
 }
 
 // Hakee geodatan
-async function fetchGeoData() {
+function fetchGeoData() {
     return fetchJSON(geoDataURL);
 }
 
@@ -38,8 +41,8 @@ async function fetchMigrationData() {
 
 // Käynnistää prosessit, kun DOM on valmis
 document.addEventListener("DOMContentLoaded", async () => {
-    const geoData = await fetchGeoData();
-    const migration = await fetchMigrationData().then(parseMigrationData).catch(() => ({}));
+    geoData = await fetchGeoData();
+    migration = await fetchMigrationData().then(parseMigrationData).catch(() => ({}));
     initMap(geoData, migration);
  });
 

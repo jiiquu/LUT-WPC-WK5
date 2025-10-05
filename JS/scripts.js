@@ -101,13 +101,9 @@ function styleByMigration(migrationData) {
 }
 
 // Käynnistää prosessit, kun DOM on valmis
-/* document.addEventListener("DOMContentLoaded", async () => {
-  geoData = await fetchGeoData();
-  migration = await fetchMigrationData()
-    .then(parseMigrationData)
-    .catch(() => ({}));
-  initMap(geoData, migration);
-}); */
+document.addEventListener("DOMContentLoaded", () => {
+  fetchGeoData();
+});
 
 
 
@@ -153,5 +149,3 @@ const getInfo = (feature, layer, migration) => {
   }
 
 }
-
-fetchGeoData();

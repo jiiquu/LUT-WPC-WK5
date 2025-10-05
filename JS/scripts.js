@@ -15,23 +15,30 @@ async function fetchJSON(url, init) {
 
 // Hakee geodatan
 async function fetchGeoData() {
-    geoData = await fetchJSON(geoDataURL);
-    console.log(geoData);
-    fetchMigrationData();
+    try {
+        geoData = await fetchJSON(geoDataURL);
+        console.log(geoData);
+        await fetchMigrationData();
+    } catch (err) {
+        console.error("Failed to fetch geoData:", err);
+    }
 }
 
 // Hakee muuttoliikedatan
 async function fetchMigrationData() {
-    const body = await fetchJSON(migrationBodyURL);
-    migrationRaw = await fetchJSON(migrationURL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body),
-    });
-    console.log(migrationRaw);
-    parseMigrationData(migrationRaw);
+    try {
+        const body = await fetchJSON(migrationBodyURL);
+        migrationRaw = await fetchJSON(migrationURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+        console.log(migrationRaw);
+        parseMigrationData(migrationRaw);
+    } catch (err) {
+        console.error("Failed to fetch migration data:", err);
+        parseMigrationData(null); // fallback to empty migration
+    }
 }
 // Parsii muuttoliikedatan
 const parseMigrationData = (response) => {
